@@ -1,5 +1,7 @@
 # DFT Auto-Research: Self-Improving Simulator of Condensed Matter Physics
 
+![Objective Phase Space: Fractional Charge Target](public/src/aut-dft-bandgap.png)
+
 [![GitHub](https://img.shields.io/badge/inspired_by-karpathy/autoresearch-blue?logo=github)](https://github.com/karpathy/autoresearch)
 [![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
 [![JAX](https://img.shields.io/badge/JAX-0.4%2B-green.svg)](https://github.com/google/jax)
@@ -27,7 +29,7 @@ The autoresearch agent only has write-access to the Python file defining the for
 
 The core objective of this repository is to computationally optimize the Neural $E_{xc}$ to correct the **Self-Interaction Error (SIE)** without causing the SCF cycle to crash. Traditional approximations (like B3LYP) result in unphysical phenomena where electron charge arbitrarily smears across disjoint fragments. A fully converged dDFT functional properly localizes the charge in a chemically valid state.
 
-![dDFT Objective Simulation Video](/Users/richa/.gemini/antigravity/brain/386535bb-d37d-4384-a8bb-389f846ff477/motion_canvas_final_video_1773363002755.webp)
+![dDFT Objective Simulation Video](/Users/richa/.gemini/antigravity/brain/386535bb-d37d-4384-a8bb-389f846ff477/final_video_perfect_blobs_1773366071101.webp)
 
 ---
 
