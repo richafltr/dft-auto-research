@@ -9,64 +9,72 @@ An automated, LLM-driven research loop designed to optimize a Neural Exchange-Co
 
 Inspired by Andrej Karpathy's [`autoresearch` repo](https://github.com/karpathy/autoresearch) (a minimal framework running on an H100 to autonomously tune hyperparameters and plot loss metrics), this project extends the concept of autonomous AI research into the domain of high-fidelity physical simulations, specifically resolving long-standing challenges in Condensed Matter Physics.
 
----
 
-## 🔬 The Current Simulation Category
 
-You are operating in the realm of **Differentiable Density Functional Theory (dDFT)**. 
+### The Current Simulation Category
+
+We operate in the realm of **Differentiable Density Functional Theory (dDFT)**. 
 
 Instead of writing the $E_{xc}$ functional in hard-coded C++ (like standard PySCF), the functional is represented as a small Neural Network or a highly parameterized polynomial equation written in a differentiable framework like **JAX** or **PyTorch**.
 
 **The Base Environment:**
-You will use differentiable DFT frameworks such as **[GradDFT](https://github.com/XanaduAI/GradDFT)** (by XanaduAI), or build a lightweight wrapper around PySCF combined with PyTorch (similar to DeepMind's DM21 architecture).
+We use differentiable DFT frameworks such as **[GradDFT](https://github.com/XanaduAI/GradDFT)** (by XanaduAI), or build a lightweight wrapper around PySCF combined with PyTorch (similar to DeepMind's DM21 architecture).
 
 **The Sandbox (`train.py`):**
 The autoresearch agent only has write-access to the Python file defining the forward pass of this Neural $E_{xc}$ functional.
 
+### The Objective: Curing the Delocalization Error (SIE) via dDFT
+
+The core objective of this repository is to computationally optimize the Neural $E_{xc}$ to correct the **Self-Interaction Error (SIE)** without causing the SCF cycle to crash. Traditional approximations (like B3LYP) result in unphysical phenomena where electron charge arbitrarily smears across disjoint fragments. A fully converged dDFT functional properly localizes the charge in a chemically valid state.
+
+![dDFT Objective Simulation Video](/Users/richa/.gemini/antigravity/brain/386535bb-d37d-4384-a8bb-389f846ff477/motion_canvas_final_video_1773363002755.webp)
+
 ---
 
-## 🎯 The Verifiable Metrics (What We Are Measuring)
+### The Verifiable Metrics (What We Are Measuring)
 
-To prove you have cured the Self-Interaction Error, you need to evaluate the agent against two specific "curves". If the agent lowers the globally calculated loss, it is objectively writing a better physics simulator.
+To prove we have cured the Self-Interaction Error, we evaluate the agent against two specific "curves". If the agent lowers the globally calculated loss, it is objectively writing a better physics simulator.
 
-### Metric A: The Fractional Charge Curve (The Sanity Check)
+#### Metric A: The Fractional Charge Curve (Warm-up checkpoint)
 In exact quantum mechanics, if you plot the energy of an atom as you add a fractional electron (e.g., from Carbon to Carbon-minus), the energy curve must be perfectly straight (piecewise linear).
 Because of SIE, standard DFT creates a convex curve that sags in the middle (delocalization error).
 
 **The Agent's Goal:** The LLM must tweak the functional so the predicted energy of an atom with 0.5 extra electrons exactly matches the linear interpolation between the integer states.
 
-### Metric B: The Transition Metal Oxide Bandgap (The Real-World Proof)
+#### Metric B: The Transition Metal Oxide Bandgap (Verifiable Real Physics Checkpoint)
 This is the connection to advanced materials like LK-99 and high-temperature superconductors. We pull a dataset of known Transition Metal Oxides (e.g., Copper Oxides, Nickelates) from the Materials Project. Standard DFT incorrectly predicts their bandgaps as exactly $0.0 \text{ eV}$ (hallucinating them as metals).
 
 **The Agent's Goal:** The LLM must maximize the Mean Absolute Error (MAE) recovery. It needs to push that $0.0 \text{ eV}$ prediction up to the experimental reality.
 
 #### Representative Mott Insulator Data
 Typical Transition Metal Oxides (TMOs) affected by SIE where standard DFT fails:
-- **NiO (Nickel(II) oxide):** Experimental gap $\approx 4.3 \text{ eV}$
-- **CoO (Cobalt(II) oxide):** Experimental gap $\approx 2.5 \text{ eV}$
-- **MnO (Manganese(II) oxide):** Experimental gap $\approx 3.9 \text{ eV}$
-- **FeO (Iron(II) oxide):** Experimental gap $\approx 2.4 \text{ eV}$
-- **CuO (Copper(II) oxide):** Experimental gap $\approx 1.2 \text{ eV}$
-- *Also includes $V_2O_3$, $YTiO_3$, and $La_2CuO_4$ (undoped parent of cuprate superconductors).*
+| Material | Chemical Name | Experimental Bandgap | Materials Project Data |
+| :--- | :--- | :--- | :--- |
+| **NiO** | Nickel(II) oxide | $\approx 4.3 \text{ eV}$ | [mp-19009](https://next-gen.materialsproject.org/materials/mp-19009) |
+| **CoO** | Cobalt(II) oxide | $\approx 2.5 \text{ eV}$ | [mp-19079](https://next-gen.materialsproject.org/materials/mp-19079) |
+| **MnO** | Manganese(II) oxide | $\approx 3.9 \text{ eV}$ | [mp-19006](https://next-gen.materialsproject.org/materials/mp-19006) |
+| **FeO** | Iron(II) oxide | $\approx 2.4 \text{ eV}$ | [mp-18905](https://next-gen.materialsproject.org/materials/mp-18905) |
+| **CuO** | Copper(II) oxide | $\approx 1.2 \text{ eV}$ | [mp-1692](https://next-gen.materialsproject.org/materials/mp-1692) |
 
-### The Global Fitness Function
+*Also includes complex oxides such as $\mathrm{V_2O_3}$, $\mathrm{YTiO_3}$, and $\mathrm{La_2CuO_4}$ (undoped parent of cuprate superconductors).*
+
+#### The Global Fitness Function
+
 
 $$
 \text{Loss} = \lambda_1 (\text{Deviation from Linearity}) + \lambda_2 (\text{Bandgap MAE}) + \lambda_3 (\text{SCF Convergence Steps})
 $$
 
----
 
-## 🤖 The "Doable" Auto-Research Loop
+
+#### Auto-Research Loop
 
 1. **Start:** The agent initializes with a standard PBE functional written in JAX/PyTorch.
 2. **Mutate:** The LLM acts as the researcher—adding a non-local density gradient term or modifying the neural network weights to penalize delocalized electron clouds.
 3. **Simulate:** The system runs a brief (e.g., 3-minute) PySCF simulation on a Carbon atom (for Metric A) and a unit cell of Cu-O (for Metric B).
 4. **Evaluate:** The script calculates the Loss. If it's lower, the git commit is merged automatically. If the SCF fails to converge (a deeply common issue when hacking functionals), it reverts the commit and feeds the failure back into the LLM context.
 
----
-
-## 🧠 What DeepMind Achieved & How We Approach It
+#### What DeepMind Achieved & How We Approach It
 
 In their landmark paper, **DeepMind** demonstrated that AI can solve fundamental issues in quantum chemistry by predicting the behavior of electrons more accurately than traditional approximations. Their **DM21** neural network functional addressed two long-standing problems:
 1. **The Delocalization Error:** Standard functionals incorrectly smear electron density over adjacent molecules instead of capturing the proper localized state.
@@ -78,11 +86,10 @@ DeepMind trained a neural functional specifically on highly accurate fractional 
 **How We Are Achieving It:**
 While DeepMind relied on massive supervised training sets of exact chemical data, we are implementing an **unsupervised/reinforcement "autoresearch" loop**. The LLM iteratively rewrites the mathematical form or weights of the functional, directly optimizing against the physical constraints (Metric A and B) in a trial-and-error environment. We are automating the *discovery* of the functional form itself.
 
----
 
-## 📋 To-Do / Task Planning for the Agent
+#### To-Do / Task Planning for the Agent
 
-To fully implement this framework, the autonomous agent should execute the following phases:
+To fully implement this framework, our autonomous agent executes the following phases:
 
 - [ ] **Phase 1: Environment & Baseline Setup**
   - Fork/clone [karpathy/autoresearch](https://github.com/karpathy/autoresearch) as the base scaffolding.
@@ -101,9 +108,9 @@ To fully implement this framework, the autonomous agent should execute the follo
   - Provide prompt templates for the LLM to understand how to mutate the $E_{xc}$ function.
   - Constrain the LLM output to strictly modify the forward pass.
 
----
 
-## 📚 The Scientific Precedent (Literature Overview)
+
+#### The Scientific Precedent (Literature Overview)
 
 - **DeepMind's DM21 Paper (Science, 2021):** *"Pushing the frontiers of density functionals by solving the fractional electron problem."* Proved that a neural functional trained on fractional charge data successfully cures the delocalization error that plagues standard DFT.
   - [Read the Abstract](https://www.science.org/doi/10.1126/science.abj6511)
