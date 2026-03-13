@@ -29,7 +29,7 @@ The autoresearch agent only has write-access to the Python file defining the for
 
 The core objective of this repository is to computationally optimize the Neural $E_{xc}$ to correct the **Self-Interaction Error (SIE)** without causing the SCF cycle to crash. Traditional approximations (like B3LYP) result in unphysical phenomena where electron charge arbitrarily smears across disjoint fragments. A fully converged dDFT functional properly localizes the charge in a chemically valid state.
 
-![dDFT Objective Simulation Video](/Users/richa/.gemini/antigravity/brain/386535bb-d37d-4384-a8bb-389f846ff477/final_video_perfect_blobs_1773366071101.webp)
+![dDFT Objective Simulation Video](public/src/dft_simulation.gif)
 
 ---
 
