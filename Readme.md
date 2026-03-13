@@ -1,4 +1,4 @@
-# DFT Auto-Research: Self-Improving Physics Simulator of Condensed Matter
+# DFT Auto-Research: Self-Improving Simulator of Condensed Matter Physics
 
 [![GitHub](https://img.shields.io/badge/inspired_by-karpathy/autoresearch-blue?logo=github)](https://github.com/karpathy/autoresearch)
 [![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
